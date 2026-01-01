@@ -166,12 +166,12 @@ B' = A - W \cdot B
 * $B = B_r + jB_i$
 * $W = W_r + jW_i$ (其中 $W_r = \cos\theta, W_i = -\sin\theta$)
 
-**步驟一：** 計算旋轉項 (Complex Multiplication)首先計算圖中下路的乘積 $T = W \times B$。注意複數乘法中 $j^2 = -1$，所以實部中間是減號。$$T_{real} = W_r B_r - W_i B_i$$$$T_{imag} = W_r B_i + W_i B_r$$
+**步驟一：** 計算旋轉項 (Complex Multiplication)首先計算圖中下路的乘積 $T = W \times B$。注意複數乘法中 $j^2 = -1$，所以實部中間是減號。$$T_{real} = W_r B_r - W_i B_i$$ $$T_{imag} = W_r B_i + W_i B_r$$
 
 **步驟二：** 執行蝴蝶加減 (Butterfly Update)利用剛剛算出來的 $T$，更新 $A$ 和 $B$。
 
-上路輸出 (加法)：$$A'_{real} = A_r + T_{real}$$$$A'_{imag} = A_i + T_{imag}$$
-下路輸出 (減法)：$$B'_{real} = A_r - T_{real}$$$$B'_{imag} = A_i - T_{imag}$$
+上路輸出 (加法)：$$A'_{real} = A_r + T_{real}$$ $$A'_{imag} = A_i + T_{imag}$$
+下路輸出 (減法)：$$B'_{real} = A_r - T_{real}$$ $$B'_{imag} = A_i - T_{imag}$$
 
 #### 4. 幾何意義
 1. 旋轉 (Rotation)：運算 $B \times W$ 代表將向量 $B$ 在複數平面上旋轉一個特定的角度。
