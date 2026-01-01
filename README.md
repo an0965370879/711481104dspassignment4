@@ -171,9 +171,12 @@ $$T_{real} = W_r B_r - W_i B_i$$  $$T_{imag} = W_r B_i + W_i B_r$$
 
 **步驟二：** 執行蝴蝶加減 (Butterfly Update)利用剛剛算出來的 $T$，更新 $A$ 和 $B$。
 
-上路輸出 (加法)： $$A'_{real} = A_r + T_{real}$$  
+上路輸出 (加法)： $$A'_{real} = A_r + T_{real}$$ 
+
 $$A'_{imag} = A_i + T_{imag}$$
-下路輸出 (減法)： $$B'_{real} = A_r - T_{real}$$  
+
+下路輸出 (減法)： $$B'_{real} = A_r - T_{real}$$ 
+ 
 $$B'_{imag} = A_i - T_{imag}$$
 
 #### 4. 幾何意義
