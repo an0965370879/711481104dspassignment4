@@ -154,9 +154,9 @@ for (int len = 2; len <= n; len <<= 1) { // 第一層：級數 (2, 4, 8, ..., 20
 
 #### 2. 數學式推導
 我們定義變數如下：
-* 輸入：$A$, $B$ (皆為複數)
-* 旋轉因子 (Twiddle Factor)：$W_N^k = e^{-j\frac{2\pi k}{N}}$
-* 輸出：$A'$, $B'$
+* 輸入： $A$ ,  $B$  (皆為複數)
+* 旋轉因子 (Twiddle Factor)： $W_N^k = e^{-j\frac{2\pi k}{N}}$ 
+* 輸出： $A'$ ,  $B'$ 
 
 核心公式 :
 這是 FFT 演算法的最高層級邏輯：$$\begin{cases}
@@ -179,15 +179,15 @@ $$T_{real} = W_r B_r - W_i B_i$$  $$T_{imag} = W_r B_i + W_i B_r$$
 
 上路輸出 (加法)：
 
-*$$A'_{real} = A_r + T_{real}$$ 
+$$A'_{real} = A_r + T_{real}$$ 
 
-*$$A'_{imag} = A_i + T_{imag}$$
+$$A'_{imag} = A_i + T_{imag}$$
 
 下路輸出 (減法)： 
 
-*$$B'_{real} = A_r - T_{real}$$ 
+$$B'_{real} = A_r - T_{real}$$ 
 
-*$$B'_{imag} = A_i - T_{imag}$$
+$$B'_{imag} = A_i - T_{imag}$$
 
 #### 4. 幾何意義
 1. 旋轉 (Rotation)：運算 $B \times W$ 代表將向量 $B$ 在複數平面上旋轉一個特定的角度。
