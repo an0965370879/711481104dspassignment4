@@ -158,11 +158,13 @@ for (int len = 2; len <= n; len <<= 1) { // 第一層：級數 (2, 4, 8, ..., 20
 * 旋轉因子 (Twiddle Factor)： $W_N^k = e^{-j\frac{2\pi k}{N}}$ 
 * 輸出： $A'$ ,  $B'$ 
 
-核心公式 :
-這是 FFT 演算法的最高層級邏輯：$$\begin{cases}
-A' = A + W \cdot B \\
-B' = A - W \cdot B
-\end{cases}$$這利用了三角函數的週期性，讓 $W \cdot B$ 這項乘積計算一次後，可以同時被「加法」和「減法」使用，大幅減少運算量。
+核心公式
+
+這是 FFT 演算法的最高層級邏輯：
+    $$\begin{cases}
+    A' = A + W \cdot B \\
+    B' = A - W \cdot B\end{cases}$$
+這利用了三角函數的週期性，讓 $W \cdot B$ 這項乘積計算一次後，可以同時被「加法」和「減法」使用，大幅減少運算量。
 
 #### 3. C 語言實作邏輯
 由於 C 語言標準庫處理複數較慢或不便，在實作高性能 FFT (如嵌入式系統或影像處理) 時，通常會將 實部 (Real, r) 與 虛部 (Imaginary, i) 分開計算。
