@@ -161,9 +161,9 @@ for (int len = 2; len <= n; len <<= 1) { // 第一層：級數 (2, 4, 8, ..., 20
 核心公式
 
 這是 FFT 演算法的最高層級邏輯：
-    $$\begin{cases}
-    A' = A + W \cdot B \\
-    B' = A - W \cdot B\end{cases}$$
+
+$$\begin{cases}A' = A + W \cdot B \\B' = A - W\cdot B\end{cases}$$
+
 這利用了三角函數的週期性，讓 $W \cdot B$ 這項乘積計算一次後，可以同時被「加法」和「減法」使用，大幅減少運算量。
 
 #### 3. C 語言實作邏輯
