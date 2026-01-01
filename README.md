@@ -249,7 +249,7 @@ Complex *H = (Complex *)malloc(N * sizeof(Complex));
     * 濾波器在時域是一串實數係數 $h[n]$ (Impulse Response)。
     * 為了利用 FFT 加速卷積，我們先將其轉換為頻域 $H[k]$。
 * 頻域數據包含 振幅 (Magnitude) 與 相位 (Phase)，因此必須使用複數儲存。
-* 大小 N：$N$ 是 FFT 的點數。為了避免 時域混疊 (Time Aliasing)，這裡的 $N$ 必須滿足 $N \ge L + P - 1$ (其中 $L$ 是音訊區塊長度，$P$ 是濾波器長度)。
+* 大小 N： $N$  是 FFT 的點數。為了避免 時域混疊 (Time Aliasing)，這裡的 $N$ 必須滿足 $N \ge L + P - 1$ (其中  $L$  是音訊區塊長度，$P$ 是濾波器長度)。
 
 2. `buffer`：FFT 的主要工作區
 ```C
