@@ -113,7 +113,7 @@ for (int len = 2; len <= n; len <<= 1) { // 第一層：級數 (2, 4, 8, ..., 20
         
         for(int i = 0; i < n; i += len) { // 第二層：遍歷每一個區塊
             Complex w = {1.0, 0.0};
-            for(int k = 0; k < len / 2; k++) { // 第三層：每個蝶形運算
+            for(int k = 0; k < len / 2; k++) { // 第三層：蝴蝶翅膀
                 // 核心運算：上 = u + v*w, 下 = u - v*w
                 // ...
             }
@@ -234,9 +234,66 @@ const int Q = 1025; // 濾波器長度 [cite: 45]
 const int N = 2048; // FFT 點數 (必須 >= P + Q - 1 以避免混疊)
 ```
 * **記憶體配置：**
-    * `buffer`: 用來放音訊做 FFT 的暫存區。
-    * `H`: 用來放濾波器的頻譜（算好一次就可以一直用）。
-    * `overlap_buf`: 用來做 Overlap-Add 的累加緩衝區。
+```
+Complex *H = (Complex *)malloc(N * sizeof(Complex));           // 濾波器頻譜
+Complex *buffer = (Complex *)malloc(N * sizeof(Complex));      // fft 工作區
+double *overlap_buf = (double *)calloc(N + P, sizeof(double)); // 重疊區域
+```
+1. `H`：濾波器的頻域形態
+```C
+Complex *H = (Complex *)malloc(N * sizeof(Complex));
+```
+
+* 用途：存放濾波器（例如 Low-pass filter）的 頻率響應 (Frequency Response)。
+    * 為何是複數 (Complex)？
+    * 濾波器在時域是一串實數係數 $h[n]$ (Impulse Response)。
+    * 為了利用 FFT 加速卷積，我們先將其轉換為頻域 $H[k]$。
+* 頻域數據包含 振幅 (Magnitude) 與 相位 (Phase)，因此必須使用複數儲存。
+* 大小 N：$N$ 是 FFT 的點數。為了避免 時域混疊 (Time Aliasing)，這裡的 $N$ 必須滿足 $N \ge L + P - 1$ (其中 $L$ 是音訊區塊長度，$P$ 是濾波器長度)。
+
+2. `buffer`：FFT 的主要工作區
+```C
+Complex *buffer = (Complex *)malloc(N * sizeof(Complex));
+```
+
+* 用途：這是一個「暫存盤」，每一個音訊區塊的計算都在這裡發生。這是最忙碌的記憶體區域。
+* 資料流向 (Data Flow)：
+    1. 載入：從 WAV 讀入一小段時域音訊 (不足 $N$ 的部分補 0)。
+    2. FFT：原地 (In-place) 運算，將時域轉為頻域。
+    3. 卷積：執行點對點乘法 (`buffer[i] = buffer[i] * H[i]`)。
+    4. IFFT：原地運算，將結果轉回時域。
+* 特性：它的內容在每一輪迴圈中都會被完全覆蓋。
+3. `overlap_buf`：處理區塊拼接的「膠水」
+```C
+double *overlap_buf = (double *)calloc(N + P, sizeof(double));
+```
+* 關鍵差異 (`calloc` vs `malloc`)：
+
+    * 這裡使用 `calloc` 而非 `malloc`，這非常重要！
+
+    * `calloc `會自動將記憶體初始化為 0。
+
+    * 由於 Overlap-Add 演算法涉及 累積加法 (Accumulation)，若記憶體中有殘留的垃圾值，會導致輸出的音訊開頭出現嚴重的爆音或雜訊。
+
+* 用途 (Overlap-Add 機制)：
+
+    * 當我們把音訊切塊做卷積再還原時，區塊運算會產生比原輸入更長的結果（因為濾波器的拖尾效應）。
+
+    * 這個區域用來暫存上一個區塊溢出的「尾巴」，準備與下一個區塊的開頭「相加」。
+* 型態：使用 `double`，因為經過 IFFT 並取實部後，數據已經回到時域，準備輸出為音訊樣本。
+---
+**運作流程圖解(Overlap-Add)**
+這三塊記憶體的協作流程如下：
+1. 準備階段：計算濾波器的 FFT，存入 `H`。
+2. 迴圈處理 (每個 Block)：
+    * `buffer` 載入音訊 $\rightarrow$ FFT $\rightarrow$ 乘上 `H` $\rightarrow$ IFFT。
+    * 此時 `buffer` 內是當前區塊的卷積結果 (長度為 $N$)。
+3. 拼接輸出 (Stitching)：
+    * 輸出 =` buffer` 的前段部分 + `overlap_buf` (上一輪留下的尾巴)。
+    * 更新 = 將 `buffer` 的後段部分 (新的尾巴) 存入 `overlap_buf`，供下一輪使用。
+
+---
+    
 * **濾波器準備：**
     ```C
     design_lowpass(buffer, ...); // 產生時域濾波器 h[n]
