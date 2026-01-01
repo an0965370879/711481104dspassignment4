@@ -113,7 +113,7 @@ for (int len = 2; len <= n; len <<= 1) { // 第一層：級數 (2, 4, 8, ..., 20
         
         for(int i = 0; i < n; i += len) { // 第二層：遍歷每一個區塊
             Complex w = {1.0, 0.0};
-            for(int k = 0; k < len / 2; k++) { // 第三層：蝴蝶翅膀
+            for(int k = 0; k < len / 2; k++) { // 第三層：每個蝶形運算
                 // 核心運算：上 = u + v*w, 下 = u - v*w
                 // ...
             }

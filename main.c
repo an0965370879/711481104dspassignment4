@@ -44,10 +44,10 @@ Complex sub(Complex a, Complex b) {
 }
 Complex mul(Complex a, Complex b) {
     Complex c;
-    c.r = a.r * b.r - a.i * b.i;
-    c.i = a.r * b.i + a.i * b.r;
+    c.r = a.r * b.r - a.i * b.i;    // 公式：(ac - bd)
+    c.i = a.r * b.i + a.i * b.r;    // 公式：i(ad + bc)
     return c;
-}
+}   //複數乘法公式 (a+bi)(c+di) = (ac-bd) + i(ad+bc)
 
 // 核心 FFT 函式
 // x: 資料陣列, n: 點數, invert: 0=FFT, 1=IFFT
@@ -58,11 +58,11 @@ void fft(Complex *x, int n, int invert){
    for(int i = 0;i < n; i++) {
        if(i < j) {
            Complex temp = x[i];
-           x[i] = x[j];
-           x[j] = temp;
+           x[i] = x[j];     // 交換x[i]和x[j]
+           x[j] = temp;     
        }
        int m = n / 2;
-       while(m >= 1 && j >= m) {
+       while(m >= 1 && j >= m) { // 計算反轉索引j 的邏輯
            j -= m;
            m /= 2;
        }
@@ -71,16 +71,16 @@ void fft(Complex *x, int n, int invert){
 
 
     // Butterfly Operations
-    for (int len = 2; len<=n; len <<=1){
-        double ang = 2 * PI / len * (invert ? -1 : 1);
-        Complex wlen = {cos(ang), sin(ang)};
-        for(int i = 0; i < n; i += len){
+    for (int len = 2; len<=n; len <<=1){ //// 第一層：級數 (2, 4, 8, ..., 2048)
+        double ang = 2 * PI / len * (invert ? -1 : 1); // 計算旋轉因子角度
+        Complex wlen = {cos(ang), sin(ang)}; // e^(i*ang) = cos(ang) + i*sin(ang)
+        for(int i = 0; i < n; i += len){      // 第二層：每個子 DFT 的起始位置
             Complex w = {1.0, 0.0};
-             for(int k = 0; k < len / 2; k++){
+             for(int k = 0; k < len / 2; k++){   // 第三層：每個蝶形運算
                 Complex u = x[i + k];
-                Complex v = mul(x[i + k + len / 2], w);
-                x[i + k] = add(u, v);
-                x[i + k + len / 2] = sub(u, v);
+                Complex v = mul(x[i + k + len / 2], w); 
+                x[i + k] = add(u, v);       // 上半部
+                x[i + k + len / 2] = sub(u, v); // 下半部
               w = mul(w, wlen);
             }
         }
@@ -88,8 +88,8 @@ void fft(Complex *x, int n, int invert){
     // IFFT Scaling
     if(invert) {
         for(int i = 0; i < n; i++) {
-            x[i].r /= n;
-            x[i].i /= n;
+            x[i].r /= n;    // 對實部做縮放
+            x[i].i /= n;    // 對虛部做縮放
         }
     }
 }
@@ -106,25 +106,27 @@ void design_lowpass(Complex *h_buffer, int N, int Q, int L, int M) {
 
     for (int n = 0; n < N; n++) {
         if (n < Q) {
-            // Sinc 函數
+            // 1. Sinc 函數：理想低通濾波器的時域形狀
             double val;
             double x = n - center;
             if (x == 0) val = cutoff / PI;
             else val = sin(cutoff * x) / (PI * x);
 
-            // Blackman Window
-            double w = 0.42 - 0.5 * cos(2 * PI * n / (Q - 1)) + 0.08 * cos(4 * PI * n / (Q - 1));
+            // 2. Blackman Window：修飾 Sinc 函數
+            // 如果直接截斷 Sinc，頻譜會有強烈震盪 (Gibbs Phenomenon)。
+            // 乘上 Blackman 窗函數可以讓邊緣平滑，大幅減少雜訊。
+            double w = 0.42 - 0.5 * cos(2 * PI * n / (Q - 1)) + 0.08 * cos(4 * PI * n / (Q - 1)); 
             val *= w;
 
-            // Gain Compensation
-            val *= L;
+            // 3. 增益補償 (Gain Compensation)
+            val *= L; // 因為升頻補了很多 0，能量被稀釋了，需乘上 80 倍補回來 [cite: 14]。
 
-            h_buffer[n].r = val;
-            h_buffer[n].i = 0.0;
+            h_buffer[n].r = val; // 實部
+            h_buffer[n].i = 0.0; // 虛部    
         } else {
-            // Zero padding
-            h_buffer[n].r = 0.0;
-            h_buffer[n].i = 0.0;
+            // 補零 (Zero Padding)：因為 FFT 需要 2048 點，濾波器只有 1025 點 。
+            h_buffer[n].r = 0.0; // 實部
+            h_buffer[n].i = 0.0; // 虛部
         }
     }
 }
