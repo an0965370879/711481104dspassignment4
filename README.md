@@ -269,7 +269,7 @@ double *overlap_buf = (double *)calloc(N + P, sizeof(double));
 ```
 * 關鍵差異 (`calloc` vs `malloc`)：
 
-    * 這裡使用 `calloc` 而非 `malloc`，這非常重要！
+    * 這裡使用 `calloc` 而非 `malloc`。
 
     * `calloc `會自動將記憶體初始化為 0。
 
