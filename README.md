@@ -245,7 +245,7 @@ Complex *H = (Complex *)malloc(N * sizeof(Complex));
 ```
 
 * 用途：存放濾波器（例如 Low-pass filter）的 頻率響應 (Frequency Response)。
-    * 為何是複數 (Complex)？
+* 為何是複數 (Complex)？
     * 濾波器在時域是一串實數係數 $h[n]$ (Impulse Response)。
     * 為了利用 FFT 加速卷積，我們先將其轉換為頻域 $H[k]$。
 * 頻域數據包含 振幅 (Magnitude) 與 相位 (Phase)，因此必須使用複數儲存。
